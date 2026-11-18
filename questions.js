@@ -261,9 +261,9 @@ window.QuestionBank = {
           title: "7.5 Models i Influències del Panteó",
           imgUrl: "https://i0.wp.com/www.glosarioarquitectonico.com/wp-content/uploads/2016/01/tholos4.jpg?ssl=1",
           blanksData: {
-            text: "El Panteó s'inspira en les estructures circulars greques anomenades ______, però elevant-les a una escala colossal amb cúpula.",
+            text: "El Panteó s'inspira en les estructures circulars____________, anomenades tholos, però elevant-les a una escala colossal amb cúpula.",
             blanks: [
-              { id: "b1", answer: "tholos", options: ["tholos", "àgora", "naos"] }
+              { id: "b1", answer: "mesopotàmiques i gregues", options: ["egipcies", "mesopotàmiques i gregues", "gregues"] }
             ]
           },
           writingData: {
