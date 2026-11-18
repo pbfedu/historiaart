@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="theme-color" content="#ce82ff">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <title>HistòriaArt - La Ruta de l'Art</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script src="questions.js"></script>
+  <script src="ads.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            display: ['Fredoka', 'sans-serif'],
+          },
+          colors: {
+            duoGreen: '#58cc02',
+            duoGreenDark: '#46a302',
+            duoBlue: '#1cb0f6',
+            duoBlueDark: '#1899d6',
+            duoOrange: '#ff9600',
+            duoOrangeDark: '#e08400',
+            duoPurple: '#a855f7',
+            duoPurpleDark: '#9333ea',
+            duoRed: '#ff4b4b',
+            duoRedDark: '#ea2b2b',
+            duoYellow: '#ffc800',
+            duoYellowDark: '#e0b000',
+            duoEmerald: '#10b981',
+            duoEmeraldDark: '#059669',
+            duoBgSuccess: '#f3e8ff',
+            duoTextSuccess: '#9333ea',
+            duoBgError: '#ffdfe0',
+            duoTextError: '#ea2b2b',
+          },
+          boxShadow: {
+            'duo-3d': '0 6px 0 0 rgba(0, 0, 0, 0.1)',
+            'btn-green': '0 6px 0 0 #46a302',
+            'btn-blue': '0 6px 0 0 #1899d6',
+            'btn-orange': '0 6px 0 0 #e08400',
+            'btn-purple': '0 6px 0 0 #7e22ce',
+            'btn-red': '0 6px 0 0 #ea2b2b',
+            'btn-yellow': '0 6px 0 0 #e0b000',
+            'btn-slate': '0 6px 0 0 #cbd5e1',
+            'btn-emerald': '0 6px 0 0 #059669',
+            'duo-card': '0 4px 0 0 #e2e8f0',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { font-family: 'Outfit', sans-serif; background-color: #ffffff; color: #1E293B; user-select: none; overflow-x: hidden; background-image: radial-gradient(#f3e8ff 2px, transparent 2px); background-size: 24px 24px; }
+    .duo-pressable:active { transform: translateY(6px) !important; box-shadow: none !important; }
+    .duo-card-pressable:active { transform: translateY(4px) !important; box-shadow: none !important; }
+    @keyframes shake { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 15% { transform: translate(-12px, 8px) rotate(-1deg); } 30% { transform: translate(12px, -8px) rotate(1deg); } 45% { transform: translate(-8px, -6px) rotate(-0.5deg); } 60% { transform: translate(8px, 6px) rotate(0.5deg); } 75% { transform: translate(-4px, 2px); } }
+    .screen-shake { animation: shake 0.45s cubic-bezier(.36,.07,.19,.97) both; }
+    @keyframes flashRed { 0% { box-shadow: inset 0 0 0 0 rgba(255, 75, 75, 0); } 30% { box-shadow: inset 0 0 60px 15px rgba(255, 75, 75, 0.45); } 100% { box-shadow: inset 0 0 0 0 rgba(255, 75, 75, 0); } }
+    .flash-red { animation: flashRed 0.5s ease-out; }
+    @keyframes flashGreen { 0% { box-shadow: inset 0 0 0 0 rgba(168, 85, 247, 0); } 30% { box-shadow: inset 0 0 60px 15px rgba(168, 85, 247, 0.45); } 100% { box-shadow: inset 0 0 0 0 rgba(168, 85, 247, 0); } }
+    .flash-green { animation: flashGreen 0.5s ease-out; }
+    @keyframes floatDuo { 0% { transform: translateY(0px); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0px); } }
+    .animate-float-duo { animation: floatDuo 3s ease-in-out infinite; }
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: #f3e8ff; }
+    ::-webkit-scrollbar-thumb { background: #d8b4fe; border-radius: 5px; }
+    ::-webkit-scrollbar-thumb:hover { background: #c084fc; }
+  </style>
+</head>
+<body class="min-h-screen selection:bg-duoPurple selection:text-white flex flex-col justify-between">
+  <div id="root" class="flex-1 flex flex-col"></div>
+
+  <footer class="w-full text-center text-xs font-bold text-purple-300 py-6 border-t-2 border-purple-100 bg-white">
+    Plataforma d'Història de l'Art. Apunts interactius inspirats en la gamificació.
+  </footer>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+    const { motion, AnimatePresence } = window.Motion;
+
+    // --- CODI SINTETITZADOR D'ÀUDIO ---
+    const playSound = (type) => {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        if (ctx.state === 'suspended') ctx.resume();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        const now = ctx.currentTime;
+
+        if (type === 'pop') {
+          osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+          gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          osc.start(now); osc.stop(now + 0.05);
+        } else if (type === 'success') {
+          osc.type = 'triangle'; [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => { osc.frequency.setValueAtTime(freq, now + idx * 0.08); });
+          gain.gain.setValueAtTime(0.25, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+          osc.start(now); osc.stop(now + 0.45);
+        } else if (type === 'error') {
+          osc.type = 'sawtooth'; osc.frequency.setValueAtTime(240, now); osc.frequency.exponentialRampToValueAtTime(120, now + 0.3);
+          gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.start(now); osc.stop(now + 0.3);
+        } else if (type === 'heartbeat') {
+          osc.type = 'sine'; osc.frequency.setValueAtTime(80, now); osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+          gain.gain.setValueAtTime(0.4, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.start(now); osc.stop(now + 0.2);
+        } else if (type === 'heal' || type === 'gemGain' || type === 'fanfare' || type === 'lifeGain') {
+          osc.type = 'sine'; osc.frequency.setValueAtTime(783.99, now); osc.frequency.setValueAtTime(1174.66, now + 0.08);
+          gain.gain.setValueAtTime(0.25, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.start(now); osc.stop(now + 0.3);
+        }
+      } catch (e) { console.warn("Àudio no permès"); }
+    };
+
+    const triggerConfetti = () => {
+      if (window.confetti) {
+        window.confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 }, colors: ['#a855f7', '#d8b4fe', '#ff9600', '#1cb0f6', '#ffc800'] });
+      }
+    };
+
+    // --- COMPONENTS BÀSICS ---
+    const GameHeader = ({ setCurrentView, currentProgress = 50 }) => (
+      <div className="flex items-center gap-4 mb-6">
+        <button onClick={() => setCurrentView({view: 'path', key: null})} className="text-slate-400 hover:text-purple-600 text-2xl font-black transition-transform hover:scale-110 active:scale-95"><i className="fa-solid fa-xmark"></i></button>
+        <div className="flex-1 bg-purple-100 h-4 rounded-full overflow-hidden border-2 border-purple-200">
+          <div className="bg-duoPurple h-full transition-all duration-500 rounded-full" style={{ width: `${currentProgress}%` }}></div>
+        </div>
+      </div>
+    );
+
+    // --- VISTES DE BOTIGA I PERFIL ---
+    function ShopView({ gems, setGems, hearts, setHearts, inventory, setInventory, setCurrentView }) {
+      const shopItems = [
+        { id: 'hearts', title: 'Poció de Vides (+2 ❤️)', price: 25, icon: 'fa-heart-circle-plus', color: 'bg-duoRed text-white', btnColor: 'bg-duoRed shadow-btn-red hover:bg-duoRedDark', disabled: hearts >= 5 || gems < 25, onBuy: () => { setGems(g => g - 25); setHearts(h => Math.min(5, h + 2)); playSound('heal'); } },
+        { id: 'fiftyFifty', title: 'Comodí 50/50', price: 30, icon: 'fa-wand-magic-sparkles', color: 'bg-duoYellow text-slate-900', btnColor: 'bg-duoYellow shadow-btn-yellow hover:bg-duoYellowDark text-slate-900', disabled: gems < 30, ownedText: `Tens: ${inventory.fiftyFifty}`, onBuy: () => { setGems(g => g - 30); setInventory(prev => ({ ...prev, fiftyFifty: prev.fiftyFifty + 1 })); playSound('gemGain'); } },
+        { id: 'doubleXp', title: 'Multiplicador 2x XP', price: 35, icon: 'fa-bolt-lightning', color: 'bg-duoBlue text-white', btnColor: 'bg-duoBlue shadow-btn-blue hover:bg-duoBlueDark', disabled: inventory.doubleXp || gems < 35, ownedText: inventory.doubleXp ? 'Activat' : null, onBuy: () => { setGems(g => g - 35); setInventory(prev => ({ ...prev, doubleXp: true })); playSound('gemGain'); } },
+        { id: 'shield', title: 'Escut de Vida', price: 40, icon: 'fa-shield-halved', color: 'bg-duoPurple text-white', btnColor: 'bg-duoPurple shadow-btn-purple hover:bg-duoPurpleDark', disabled: gems < 40, ownedText: `Tens: ${inventory.shield}`, onBuy: () => { setGems(g => g - 40); setInventory(prev => ({ ...prev, shield: prev.shield + 1 })); playSound('gemGain'); } }
+      ];
+
+      return (
+        <div className="max-w-3xl mx-auto bg-white rounded-[32px] p-6 shadow-duo-card border-[3px] border-slate-200 space-y-8">
+          <div className="flex items-center justify-between">
+            <button onClick={() => setCurrentView({view: 'path', key: null})} className="w-12 h-12 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full font-bold text-2xl transition-colors"><i className="fa-solid fa-xmark"></i></button>
+            <span className="bg-emerald-100 text-duoEmeraldDark border-2 border-emerald-200 text-sm font-black px-4 py-2 rounded-2xl shadow-sm flex items-center gap-2"><i className="fa-solid fa-gem text-amber-400"></i> {gems} Gemes</span>
+          </div>
+          <div className="text-center space-y-4">
+            <h2 className="text-4xl font-display font-black text-slate-800">Botiga d'Art</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {shopItems.map(item => (
+              <div key={item.id} className="bg-white border-[3px] border-slate-200 rounded-[24px] p-5 flex flex-col justify-between space-y-5 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div className={`w-14 h-14 rounded-[20px] ${item.color} flex items-center justify-center text-2xl border-2 border-black/10`}><i className={`fa-solid ${item.icon}`}></i></div>
+                  {item.ownedText && <span className="text-xs font-black bg-slate-200 px-3 py-1.5 rounded-xl">{item.ownedText}</span>}
+                </div>
+                <h3 className="font-display font-black text-slate-800 text-xl">{item.title}</h3>
+                <button disabled={item.disabled} onClick={() => { playSound('pop'); item.onBuy(); }} className={`w-full font-display font-black py-4 rounded-[20px] border-b-[6px] border-x-2 border-t-2 flex items-center justify-center gap-2 ${item.disabled ? 'bg-slate-100 text-slate-400' : item.btnColor}`}>{item.disabled ? 'Sense gemes' : <>{item.price} <i className="fa-solid fa-gem text-amber-200"></i></>}</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function ResultsView({ resultData, setCurrentView, xp, gems }) {
+      const { stars, moduleName, xpEarned } = resultData;
+      useEffect(() => { playSound('fanfare'); setTimeout(() => triggerConfetti(), 300); }, []);
+      return (
+        <div className="max-w-2xl mx-auto flex flex-col items-center justify-center space-y-8 py-12 text-center">
+          <h2 className="text-4xl sm:text-5xl font-display font-black text-duoPurple drop-shadow-md">Lliçó Completada!</h2>
+          <p className="text-xl font-bold text-slate-600">Has dominat: <span className="text-slate-800">{moduleName}</span></p>
+          <div className="flex gap-4 my-6">
+            <div className="bg-amber-100 border-[3px] border-amber-300 rounded-[24px] p-6 w-32 flex flex-col items-center">
+              <i className="fa-solid fa-star text-4xl text-amber-500 mb-2"></i><span className="text-2xl font-black text-amber-700">+{stars}</span>
+            </div>
+            <div className="bg-blue-100 border-[3px] border-blue-300 rounded-[24px] p-6 w-32 flex flex-col items-center">
+              <i className="fa-solid fa-bolt text-4xl text-blue-500 mb-2"></i><span className="text-2xl font-black text-blue-700">+{xpEarned}</span>
+            </div>
+          </div>
+          <button onClick={() => setCurrentView({view: 'path', key: null})} className="w-full max-w-md bg-duoPurple border-x-2 border-t-2 border-b-[6px] border-black/10 text-white font-display font-black text-xl py-4 rounded-[24px] shadow-btn-purple duo-pressable uppercase">Continuar</button>
+        </div>
+      );
+    }
+
+    // --- MINIJOCS PRO ---
+
+    // 1. FITXA TÈCNICA (La Taula)
+    function GameFitxaTecnica({ chapter, gameKey, setCurrentView, onSuccess, onFinish }) {
+      const [q, setQ] = useState(null);
+      const [answers, setAnswers] = useState({});
+      const [status, setStatus] = useState({});
+      const [isRevealed, setIsRevealed] = useState(false);
+
+      useEffect(() => {
+        setQ(window.QuestionBank.getFitxa(chapter.id, gameKey));
+        setAnswers({}); setStatus({}); setIsRevealed(false);
+      }, [chapter.id, gameKey]);
+
+      if (!q) return null;
+
+      const handleInput = (id, val) => {
+        if (!isRevealed) setAnswers(prev => ({ ...prev, [id]: val }));
+      };
+
+      const handleCheck = () => {
+        playSound('pop');
+        let newStatus = {};
+        let allPerfect = true;
+
+        q.fields.forEach(f => {
+          const userVal = (answers[f.id] || "").toLowerCase().trim();
+          const matchCount = f.keywords.filter(kw => userVal.includes(kw.toLowerCase())).length;
+          
+          if (matchCount === f.keywords.length && f.keywords.length > 0) {
+            newStatus[f.id] = 'correct';
+          } else if (matchCount > 0) {
+            newStatus[f.id] = 'partial';
+            allPerfect = false;
+          } else {
+            newStatus[f.id] = 'error';
+            allPerfect = false;
+          }
+        });
+
+        setStatus(newStatus);
+
+        if (allPerfect) {
+          onSuccess("TAULA PERFECTA!", "Has omplert totes les dades correctament.", q.exp, 30, (xp) => onFinish(3, xp, 'Fitxa Tècnica'));
+        } else {
+          playSound('error');
+        }
+      };
+
+      const handleGiveUp = () => {
+        playSound('error');
+        let revealedAnswers = {};
+        let newStatus = {};
+        q.fields.forEach(f => {
+          revealedAnswers[f.id] = f.model;
+          newStatus[f.id] = 'revealed';
+        });
+        setAnswers(revealedAnswers);
+        setStatus(newStatus);
+        setIsRevealed(true);
+      };
+
+      const getFieldStyle = (id) => {
+        if (status[id] === 'correct') return "bg-emerald-50 border-duoGreen text-duoGreenDark";
+        if (status[id] === 'partial') return "bg-amber-50 border-amber-400 text-amber-700";
+        if (status[id] === 'error') return "bg-red-50 border-duoRed text-duoRedDark";
+        if (status[id] === 'revealed') return "bg-slate-100 border-slate-400 text-slate-600 font-bold";
+        return "bg-slate-50 border-slate-200 focus:border-duoPurple";
+      };
+
+      return (
+        <div className="max-w-3xl mx-auto space-y-6 pt-4">
+          <GameHeader setCurrentView={setCurrentView} currentProgress={30} />
+          
+          <div className="w-full bg-slate-100 rounded-[24px] p-2 border-4 border-slate-200 shadow-sm relative overflow-hidden h-[250px] sm:h-[300px]">
+             <img src={q.imgUrl} alt="Obra" className="w-full h-full object-cover rounded-[16px] hover:scale-105 transition-transform duration-700" />
+             <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-4 py-2 rounded-xl font-black text-sm border-2 border-white text-slate-800 shadow-lg">La Taula Tècnica</div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {q.fields.map(f => (
+              <div key={f.id} className="bg-white border-2 border-b-[4px] border-slate-200 rounded-[20px] p-4 flex flex-col gap-2 relative overflow-hidden">
+                <label className="font-display font-black text-duoPurple text-sm uppercase tracking-wider flex justify-between">
+                  {f.label}
+                  {status[f.id] === 'correct' && <i className="fa-solid fa-check text-duoGreen text-lg"></i>}
+                  {status[f.id] === 'partial' && <i className="fa-solid fa-minus text-amber-500 text-lg"></i>}
+                  {status[f.id] === 'error' && <i className="fa-solid fa-xmark text-duoRed text-lg"></i>}
+                </label>
+                {f.type === 'textarea' ? (
+                  <textarea rows="3" readOnly={isRevealed} value={answers[f.id] || ''} onChange={e => handleInput(f.id, e.target.value)} placeholder={`Escriu aquí...`} className={`w-full border-2 rounded-xl p-3 font-bold text-slate-700 outline-none resize-none transition-colors ${getFieldStyle(f.id)}`}></textarea>
+                ) : (
+                  <input type="text" readOnly={isRevealed} value={answers[f.id] || ''} onChange={e => handleInput(f.id, e.target.value)} placeholder={`...`} className={`w-full border-2 rounded-xl p-3 font-bold text-slate-700 outline-none transition-colors ${getFieldStyle(f.id)}`} />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {!isRevealed ? (
+            <div className="flex gap-4 pt-4">
+              <button onClick={handleGiveUp} className="w-1/3 bg-slate-100 text-slate-500 font-display font-black text-lg py-4 rounded-[20px] border-x-2 border-t-2 border-b-[6px] border-slate-300 active:translate-y-1 transition-all">Rendir-se</button>
+              <button onClick={handleCheck} className="w-2/3 bg-duoPurple text-white font-display font-black text-xl py-4 rounded-[24px] border-x-2 border-t-2 border-b-[6px] border-black/10 shadow-btn-purple duo-pressable">Comprovar</button>
+            </div>
+          ) : (
+            <div className="pt-4">
+              <button onClick={() => onFinish(1, 10, 'Fitxa Tècnica')} className="w-full bg-slate-800 text-white font-display font-black text-xl py-4 rounded-[24px] border-x-2 border-t-2 border-b-[6px] border-black/10 active:translate-y-1 transition-all">Continuar (Respostes Revelades)</button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // 2. SECCIÓ D'OBRA DOBLE (Buit + Redacció Lliure)
+    function GameObraSeccio({ chapter, gameKey, setCurrentView, onSuccess, onError, onFinish }) {
+      const [data, setData] = useState(null);
+      const [phase, setPhase] = useState(1); 
+      const [blanksAnswers, setBlanksAnswers] = useState({});
+      const [writingText, setWritingText] = useState("");
+      const [writingResult, setWritingResult] = useState(null); 
+
+      useEffect(() => {
+        setData(window.QuestionBank.getObraSeccio(chapter.id, gameKey));
+        setPhase(1); setBlanksAnswers({}); setWritingText(""); setWritingResult(null);
+      }, [chapter.id, gameKey]);
+
+      if (!data) return null;
+
+      const validateBlanks = () => {
+        let allOk = true;
+        data.blanksData.blanks.forEach(b => { if (blanksAnswers[b.id] !== b.answer) allOk = false; });
+        
+        if (allOk && Object.keys(blanksAnswers).length === data.blanksData.blanks.length) {
+          playSound('success');
+          setPhase(2);
+        } else {
+          onError("TEXT INCORRECTE", "Falten conceptes clau o no són al lloc correcte.", "Intenta col·locar les paraules de nou.");
+        }
+      };
+
+      const validateWriting = () => {
+        playSound('pop');
+        const userVal = writingText.toLowerCase();
+        const keywords = data.writingData.keywords;
+        
+        const foundKeywords = keywords.filter(kw => userVal.includes(kw.toLowerCase()));
+        const threshold = Math.ceil(keywords.length / 2); 
+        const isPartialCorrect = foundKeywords.length >= threshold;
+        
+        setWritingResult({
+          status: isPartialCorrect ? 'partial_correct' : 'partial_incorrect',
+          found: foundKeywords.length,
+          total: keywords.length
+        });
+        setPhase(3); 
+      };
+
+      return (
+        <div className="max-w-2xl mx-auto space-y-6 pt-4 pb-12">
+          <GameHeader setCurrentView={setCurrentView} currentProgress={phase === 1 ? 30 : phase === 2 ? 60 : 100} />
+          
+          <div className="w-full h-[200px] bg-slate-100 rounded-[24px] border-4 border-slate-200 shadow-sm overflow-hidden mb-4 relative">
+            <img src={data.imgUrl} className="w-full h-full object-cover" />
+            <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg font-black text-xs border border-white text-slate-800 shadow-sm uppercase tracking-wider">{data.title}</div>
+          </div>
+
+          {phase === 1 && (
+            <div className="space-y-6 animate-fade-in">
+              <h2 className="text-2xl font-display font-black text-slate-800 text-center">I. Completa els conceptes clau</h2>
+              <div className="bg-white border-[3px] border-b-[6px] border-slate-200 rounded-[32px] p-8 text-lg sm:text-xl font-bold text-slate-700 leading-relaxed shadow-sm">
+                {data.blanksData.text}
+              </div>
+              <div className="space-y-4">
+                {data.blanksData.blanks.map((b, i) => (
+                  <div key={b.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-4 rounded-[24px] border-[3px] border-slate-200">
+                    <span className="font-display font-black text-slate-500 text-sm uppercase">Buit {i + 1}:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {b.options.map((opt, j) => (
+                        <button key={j} onClick={() => { playSound('pop'); setBlanksAnswers(prev => ({ ...prev, [b.id]: opt })); }} className={`px-4 py-2 rounded-[16px] font-display font-black text-sm border-2 border-b-4 transition-all active:translate-y-1 active:border-b-2 ${blanksAnswers[b.id] === opt ? 'bg-duoPurple text-white border-duoPurpleDark' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'}`}>
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button onClick={validateBlanks} className="w-full bg-duoPurple text-white font-display font-black text-xl py-4 rounded-[24px] border-x-2 border-t-2 border-b-[6px] border-black/10 shadow-btn-purple duo-pressable mt-4">Comprovar Buit</button>
+            </div>
+          )}
+
+          {phase === 2 && (
+            <div className="space-y-6 animate-fade-in">
+              <h2 className="text-2xl font-display font-black text-slate-800 text-center">II. Redacció Estesa</h2>
+              <div className="bg-amber-50 border-2 border-amber-200 p-4 rounded-2xl flex gap-3 text-amber-800">
+                 <i className="fa-solid fa-pen-nib text-xl mt-1"></i>
+                 <p className="font-bold text-sm">{data.writingData.prompt}</p>
+              </div>
+              
+              <textarea 
+                rows="6" 
+                value={writingText}
+                onChange={e => setWritingText(e.target.value)}
+                placeholder="Escriu aquí la teva explicació..."
+                className="w-full bg-white border-4 border-slate-200 rounded-[24px] p-5 font-bold text-slate-700 focus:border-duoPurple outline-none resize-none shadow-sm"
+              ></textarea>
+
+              <button onClick={validateWriting} className="w-full bg-duoOrange text-white font-display font-black text-xl py-4 rounded-[24px] border-x-2 border-t-2 border-b-[6px] border-black/10 shadow-btn-orange duo-pressable">Corregir Redacció</button>
+            </div>
+          )}
+
+          {phase === 3 && writingResult && (
+            <div className="space-y-6 animate-fade-in">
+              <div className={`p-6 rounded-[24px] border-[4px] text-center space-y-2 ${writingResult.status === 'partial_correct' ? 'bg-emerald-50 border-duoGreen' : 'bg-red-50 border-duoRed'}`}>
+                 <div className={`w-16 h-16 rounded-full mx-auto flex items-center justify-center text-4xl mb-4 border-4 ${writingResult.status === 'partial_correct' ? 'bg-duoGreen text-white border-emerald-200' : 'bg-duoRed text-white border-red-200'}`}>
+                    <i className={`fa-solid ${writingResult.status === 'partial_correct' ? 'fa-check' : 'fa-xmark'}`}></i>
+                 </div>
+                 <h2 className={`text-3xl font-display font-black ${writingResult.status === 'partial_correct' ? 'text-duoGreenDark' : 'text-duoRedDark'}`}>
+                   {writingResult.status === 'partial_correct' ? 'Parcialment Correcte!' : 'Parcialment Incorrecte'}
+                 </h2>
+                 <p className="font-bold text-slate-600 text-lg">
+                   Has inclòs {writingResult.found} de {writingResult.total} conceptes clau.
+                 </p>
+              </div>
+
+              <div className="bg-slate-50 border-[3px] border-slate-200 rounded-[24px] p-6 space-y-3">
+                 <h3 className="font-display font-black text-duoPurple uppercase tracking-wider flex items-center gap-2"><i className="fa-solid fa-book-open"></i> Resposta Model</h3>
+                 <p className="font-bold text-slate-700 leading-relaxed">{data.writingData.modelAnswer}</p>
+                 <div className="pt-2 flex flex-wrap gap-2">
+                   <span className="text-xs font-black text-slate-400 uppercase mr-2 mt-1">Keywords:</span>
+                   {data.writingData.keywords.map((kw, i) => (
+                      <span key={i} className={`px-2 py-1 rounded-md text-xs font-black ${writingText.toLowerCase().includes(kw.toLowerCase()) ? 'bg-emerald-100 text-duoGreenDark border border-emerald-200' : 'bg-slate-200 text-slate-500'}`}>{kw}</span>
+                   ))}
+                 </div>
+              </div>
+
+              <button onClick={() => { playSound('fanfare'); triggerConfetti(); onFinish(3, 40, data.title); }} className="w-full bg-duoPurple text-white font-display font-black text-xl py-4 rounded-[24px] border-x-2 border-t-2 border-b-[6px] border-black/10 shadow-btn-purple active:translate-y-1 transition-all uppercase tracking-widest mt-6">
+                 Superar Secció
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // 3. JOC: VERITAT O FALS
+    function GameQuizTF({ chapter, gameKey, setCurrentView, onSuccess, onError, onFinish }) {
+      const [q, setQ] = useState(null);
+      const [selectedAnswer, setSelectedAnswer] = useState(null);
+
+      useEffect(() => {
+        setQ(window.QuestionBank.getQuizTF(chapter.id, gameKey));
+        setSelectedAnswer(null);
+      }, [chapter.id, gameKey]);
+
+      if (!q) return null;
+
+      const handleCheck = () => {
+        if (selectedAnswer === null) return;
+        if (selectedAnswer === q.correctAnswer) {
+          onSuccess("EXCEL·LENT!", "Resposta correcta.", q.exp, 15, (xp) => onFinish(2, xp, 'Veritat o Fals'));
+        } else {
+          onError("INCORRECTE", "La resposta no és correcta.", q.exp);
+        }
+      };
+
+      return (
+        <div className="max-w-xl mx-auto space-y-8 pt-4 pb-12">
+          <GameHeader setCurrentView={setCurrentView} currentProgress={50} />
+          
+          <div className="text-center space-y-4">
+            <h2 className="text-2xl sm:text-3xl font-display font-black text-slate-800">{q.question}</h2>
+          </div>
+
+          {q.imgUrl && (
+            <div className="w-full h-[200px] bg-slate-100 rounded-[24px] border-4 border-slate-200 shadow-sm overflow-hidden relative">
+              <img src={q.imgUrl} className="w-full h-full object-cover" />
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-4">
+            <button 
+              onClick={() => { playSound('pop'); setSelectedAnswer(true); }}
+              className={`py-6 rounded-[24px] font-display font-black text-2xl border-x-2 border-t-2 border-b-[6px] transition-all ${selectedAnswer === true ? 'bg-duoBlue text-white border-duoBlueDark' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}
+            >
+              Veritat
+            </button>
+            <button 
+              onClick={() => { playSound('pop'); setSelectedAnswer(false); }}
+              className={`py-6 rounded-[24px] font-display font-black text-2xl border-x-2 border-t-2 border-b-[6px] transition-all ${selectedAnswer === false ? 'bg-duoBlue text-white border-duoBlueDark' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}
+            >
+              Fals
+            </button>
+          </div>
+
+          <button 
+            disabled={selectedAnswer === null}
+            onClick={handleCheck} 
+            className={`w-full font-display font-black text-xl py-4 rounded-[24px] border-x-2 border-t-2 border-b-[6px] transition-all ${selectedAnswer === null ? 'bg-slate-200 text-slate-400 border-slate-300' : 'bg-duoGreen text-white border-duoGreenDark shadow-btn-green duo-pressable'}`}
+          >
+            Comprovar
+          </button>
+        </div>
+      );
+    }
+
+    // 4. JOC: ELECCIÓ MÚLTIPLE (Test)
+    function GameQuizMC({ chapter, gameKey, setCurrentView, onSuccess, onError, onFinish }) {
+      const [q, setQ] = useState(null);
+      const [selectedAnswer, setSelectedAnswer] = useState(null);
+
+      useEffect(() => {
+        setQ(window.QuestionBank.getQuizMC(chapter.id, gameKey));
+        setSelectedAnswer(null);
+      }, [chapter.id, gameKey]);
+
+      if (!q) return null;
+
+      const handleCheck = () => {
+        if (selectedAnswer === null) return;
+        if (selectedAnswer === q.correctAnswer) {
+          onSuccess("CORRECTE!", "Molt ben pensat.", q.exp, 20, (xp) => onFinish(3, xp, 'Test'));
+        } else {
+          onError("INCORRECTE", "Aquesta opció no és la correcta.", q.exp);
+        }
+      };
+
+      return (
+        <div className="max-w-xl mx-auto space-y-6 pt-4 pb-12">
+          <GameHeader setCurrentView={setCurrentView} currentProgress={50} />
+          
+          <div className="text-center space-y-4">
+            <h2 className="text-2xl sm:text-3xl font-display font-black text-slate-800">{q.question}</h2>
+          </div>
+
+          {q.imgUrl && (
+            <div className="w-full h-[180px] bg-slate-100 rounded-[24px] border-4 border-slate-200 shadow-sm overflow-hidden relative">
+              <img src={q.imgUrl} className="w-full h-full object-cover" />
+            </div>
+          )}
+
+          <div className="space-y-3">
+            {q.options.map((opt, i) => (
+              <button 
+                key={i}
+                onClick={() => { playSound('pop'); setSelectedAnswer(i); }}
+                className={`w-full p-4 rounded-[20px] font-bold text-lg border-2 border-b-[4px] text-left transition-all flex items-center gap-4 ${selectedAnswer === i ? 'bg-duoBlue/10 border-duoBlue text-duoBlueDark' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}
+              >
+                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center font-display font-black text-sm shrink-0 ${selectedAnswer === i ? 'border-duoBlue bg-duoBlue text-white' : 'border-slate-300 text-slate-500'}`}>
+                   {String.fromCharCode(65 + i)}
+                </div>
+                <span>{opt}</span>
+              </button>
+            ))}
+          </div>
+
+          <button 
+            disabled={selectedAnswer === null}
+            onClick={handleCheck} 
+            className={`w-full font-display font-black text-xl py-4 rounded-[24px] border-x-2 border-t-2 border-b-[6px] transition-all mt-4 ${selectedAnswer === null ? 'bg-slate-200 text-slate-400 border-slate-300' : 'bg-duoGreen text-white border-duoGreenDark shadow-btn-green duo-pressable'}`}
+          >
+            Comprovar
+          </button>
+        </div>
+      );
+    }
+
+    // --- MAPA RUTA (Actualitzat amb els NOMS EXACTES del teu JS) ---
+    function PathMap({ selectedChapter, nodeProgress, setCurrentView }) {
+      const sections = [
+        {
+          id: "general", title: "L'Imperi Romà", desc: "Context Històric i Arquitectura General", color: "bg-duoBlue",
+          nodes: [
+            { key: 'roma_context', name: 'Context Històric', icon: 'fa-landmark', color: 'bg-duoBlue', shadow: 'shadow-btn-blue', gameType: 'obra_seccio' },
+            { key: 'roma_urbanisme', name: 'Urbanisme', icon: 'fa-city', color: 'bg-duoBlue', shadow: 'shadow-btn-blue', gameType: 'obra_seccio' },
+            { key: 'roma_arquitectura', name: 'Arquitectura', icon: 'fa-building-columns', color: 'bg-duoBlue', shadow: 'shadow-btn-blue', gameType: 'obra_seccio' },
+            { key: 'roma_escultura', name: 'Escultura', icon: 'fa-user-tie', color: 'bg-duoBlue', shadow: 'shadow-btn-blue', gameType: 'obra_seccio' },
+            { key: 'roma_pintura', name: 'Pintura', icon: 'fa-palette', color: 'bg-duoBlue', shadow: 'shadow-btn-blue', gameType: 'obra_seccio' },
+            { key: 'tf_c1', name: 'Repàs V/F', icon: 'fa-scale-balanced', color: 'bg-duoBlue', shadow: 'shadow-btn-blue', gameType: 'tf' },
+            { key: 'mc_u2', name: 'Test Final', icon: 'fa-list-check', color: 'bg-duoBlue', shadow: 'shadow-btn-blue', gameType: 'mc' }
+          ]
+        },
+        {
+          id: "obra1", title: "El Colosseu", desc: "Arquitectura per a l'espectacle", color: "bg-duoPurple",
+          nodes: [
+            { key: 'colosseu_fitxa', name: '1. Fitxa', icon: 'fa-table-list', color: 'bg-duoPurple', shadow: 'shadow-btn-purple', gameType: 'fitxa' },
+            { key: 'colosseu_formal', name: '2. Forma', icon: 'fa-pen-nib', color: 'bg-duoPurple', shadow: 'shadow-btn-purple', gameType: 'obra_seccio' },
+            { key: 'colosseu_entorn', name: '3. Entorn', icon: 'fa-tree-city', color: 'bg-duoPurple', shadow: 'shadow-btn-purple', gameType: 'obra_seccio' },
+            { key: 'colosseu_funcio', name: '4. Funció', icon: 'fa-masks-theater', color: 'bg-duoPurple', shadow: 'shadow-btn-purple', gameType: 'obra_seccio' },
+            { key: 'colosseu_models', name: '5. Models', icon: 'fa-lightbulb', color: 'bg-duoPurple', shadow: 'shadow-btn-purple', gameType: 'obra_seccio' },
+            { key: 'tf_col2', name: 'Repàs V/F', icon: 'fa-scale-balanced', color: 'bg-duoPurple', shadow: 'shadow-btn-purple', gameType: 'tf' },
+            { key: 'mc_col1', name: 'Test Final', icon: 'fa-list-check', color: 'bg-duoPurple', shadow: 'shadow-btn-purple', gameType: 'mc' }
+          ]
+        },
+        {
+          id: "obra2", title: "El Panteó", desc: "El temple de tots els déus", color: "bg-duoEmerald",
+          nodes: [
+            { key: 'panteo_fitxa', name: '1. Fitxa', icon: 'fa-table-list', color: 'bg-duoEmerald', shadow: 'shadow-btn-emerald', gameType: 'fitxa' },
+            { key: 'panteo_formal', name: '2. Forma', icon: 'fa-pen-nib', color: 'bg-duoEmerald', shadow: 'shadow-btn-emerald', gameType: 'obra_seccio' },
+            { key: 'panteo_entorn', name: '3. Entorn', icon: 'fa-tree-city', color: 'bg-duoEmerald', shadow: 'shadow-btn-emerald', gameType: 'obra_seccio' },
+            { key: 'panteo_funcio', name: '4. Funció', icon: 'fa-masks-theater', color: 'bg-duoEmerald', shadow: 'shadow-btn-emerald', gameType: 'obra_seccio' },
+            { key: 'panteo_models', name: '5. Models', icon: 'fa-lightbulb', color: 'bg-duoEmerald', shadow: 'shadow-btn-emerald', gameType: 'obra_seccio' },
+            { key: 'tf_pan1', name: 'Repàs V/F', icon: 'fa-scale-balanced', color: 'bg-duoEmerald', shadow: 'shadow-btn-emerald', gameType: 'tf' },
+            { key: 'mc_pan2', name: 'Test Final', icon: 'fa-list-check', color: 'bg-duoEmerald', shadow: 'shadow-btn-emerald', gameType: 'mc' }
+          ]
+        }
+      ];
+
+      return (
+        <div className="space-y-16 pb-20 pt-4 max-w-lg mx-auto">
+          {sections.map((section, sIdx) => (
+            <div key={section.id} className="relative flex flex-col items-center">
+              <div className={`${section.color} w-full text-white p-6 rounded-[24px] shadow-duo-3d border-b-[6px] border-2 border-black/20 mb-8 relative z-20`}>
+                 <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-2xl font-display font-black drop-shadow-md">{section.title}</h3>
+                      <p className="text-white/90 text-sm font-bold mt-1">{section.desc}</p>
+                    </div>
+                    <button className="bg-white/20 hover:bg-white/30 p-3 rounded-xl border-2 border-white/40 transition-colors"><i className="fa-solid fa-book-open text-xl"></i></button>
+                 </div>
+              </div>
+              <div className="relative w-full flex flex-col items-center space-y-12 py-4">
+                <div className="absolute top-0 bottom-0 left-1/2 w-8 bg-slate-200 -translate-x-1/2 rounded-full z-0 border-x-[3px] border-slate-300 opacity-60"></div>
+                {section.nodes.map((node, index) => {
+                  const stars = nodeProgress[node.key] || 0;
+                  const isCompleted = stars > 0;
+                  const offsetClass = index % 2 === 0 ? '-translate-x-16 sm:-translate-x-24' : 'translate-x-16 sm:translate-x-24';
+                  const activeColor = isCompleted ? 'bg-amber-400 shadow-btn-yellow border-amber-500 text-amber-900' : `${node.color} ${node.shadow} text-white border-black/20`;
+
+                  return (
+                    <div key={node.key} className={`relative flex flex-col items-center ${offsetClass} z-10`}>
+                      <button onClick={() => { playSound('pop'); setCurrentView({ view: node.gameType, key: node.key }); }} className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full ${activeColor} flex flex-col items-center justify-center text-4xl font-black transition-transform hover:scale-110 active:scale-95 border-b-[8px] border-2 relative group shadow-lg`}>
+                        <i className={`fa-solid ${isCompleted ? 'fa-check text-5xl' : node.icon}`}></i>
+                        {isCompleted && <div className="absolute -top-4 bg-white text-amber-500 border-4 border-amber-400 text-sm px-3 py-1 rounded-full font-black flex items-center gap-1.5 shadow-md transform rotate-6 animate-float-duo"><i className="fa-solid fa-crown text-xs"></i><span>{stars}</span></div>}
+                      </button>
+                      <div className="absolute -bottom-8 w-[180px] text-center">
+                        <span className="font-display font-black text-sm text-slate-500 bg-white/80 px-2 py-1 rounded-lg shadow-sm">{node.name}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // --- APP CORE ---
+    function App() {
+      const [isPro, setIsPro] = useState(true);
+      const [hearts, setHearts] = useState(() => parseInt(localStorage.getItem('hl_hearts') || '5'));
+      const [xp, setXp] = useState(() => parseInt(localStorage.getItem('hl_xp') || '0'));
+      const [gems, setGems] = useState(() => parseInt(localStorage.getItem('hl_gems') || '20'));
+      const [streak, setStreak] = useState(() => parseInt(localStorage.getItem('hl_streak') || '1'));
+      const [inventory, setInventory] = useState(() => JSON.parse(localStorage.getItem('hl_inventory') || '{"fiftyFifty":0,"doubleXp":false,"shield":0}'));
+      const [nodeProgress, setNodeProgress] = useState(() => JSON.parse(localStorage.getItem('hl_nodeProgress') || '{}'));
+      
+      const [currentView, setCurrentView] = useState({ view: 'path', key: null }); 
+      const [screenEffect, setScreenEffect] = useState('');
+      const [showCprModal, setShowCprModal] = useState(false);
+      const [cprClicks, setCprClicks] = useState(0);
+      const [lastResultData, setLastResultData] = useState(null);
+      const [sheet, setSheet] = useState({ isOpen: false });
+
+      useEffect(() => {
+        localStorage.setItem('hl_hearts', hearts); localStorage.setItem('hl_xp', xp); localStorage.setItem('hl_gems', gems);
+        localStorage.setItem('hl_inventory', JSON.stringify(inventory)); localStorage.setItem('hl_nodeProgress', JSON.stringify(nodeProgress));
+      }, [hearts, xp, gems, inventory, nodeProgress]);
+
+      const triggerError = (title, message, exp) => {
+        playSound('error');
+        if (inventory.shield > 0) { setInventory(prev => ({ ...prev, shield: prev.shield - 1 })); } 
+        else {
+          setHearts(h => {
+            const next = Math.max(0, h - 1);
+            if (next === 0) setTimeout(() => { setShowCprModal(true); setCprClicks(0); }, 600);
+            return next;
+          });
+        }
+        setScreenEffect('screen-shake flash-red'); setTimeout(() => setScreenEffect(''), 500);
+        setSheet({ isOpen: true, type: 'error', title: title || "ERROR!", message, explanation: exp, onContinue: () => setSheet(s => ({ ...s, isOpen: false })) });
+      };
+
+      const triggerSuccess = (title, message, exp, points = 20, callback = null) => {
+        playSound('success');
+        setXp(x => x + points); setGems(g => g + 5); playSound('gemGain');
+        setScreenEffect('flash-green'); setTimeout(() => setScreenEffect(''), 500);
+        setSheet({ isOpen: true, type: 'success', title: title || "MOLT BÉ!", message, explanation: exp, onContinue: () => { setSheet(s => ({ ...s, isOpen: false })); if (callback) callback(points); } });
+      };
+
+      const handleGameFinish = (nodeKey, stars, xpEarned, moduleName) => {
+        setNodeProgress(prev => ({ ...prev, [nodeKey]: Math.max(prev[nodeKey] || 0, stars) }));
+        setLastResultData({ stars, xpEarned, moduleName });
+        setCurrentView({ view: 'results', key: null });
+      };
+
+      const handleCprClick = () => {
+        if (cprClicks + 1 >= 10) {
+          playSound('heal'); triggerConfetti(); setCprClicks(10);
+          setTimeout(() => { setHearts(5); setShowCprModal(false); setCurrentView({ view: 'path', key: null }); }, 1200);
+        } else { playSound('heartbeat'); setCprClicks(c => c + 1); }
+      };
+
+      return (
+        <div className={`min-h-screen text-slate-800 flex flex-col font-sans transition-all duration-300 ${screenEffect}`}>
+          
+          {currentView.view === 'path' && (
+            <header className="sticky top-0 z-40 bg-white border-b-[3px] border-slate-200 shadow-sm px-4 py-3">
+              <div className="max-w-4xl mx-auto flex items-center justify-between">
+                <div onClick={() => { playSound('pop'); setCurrentView({view: 'path', key: null}); }} className="flex items-center gap-3 cursor-pointer group">
+                  <div className="w-12 h-12 rounded-[18px] bg-duoPurple flex items-center justify-center text-white text-2xl font-black shadow-btn-purple group-hover:scale-105 border-2 border-black/10"><i className="fa-solid fa-palette"></i></div>
+                  <h1 className="text-2xl font-display font-black tracking-tight hidden sm:block">Història<span className="text-duoPurple">Art</span></h1>
+                </div>
+                
+                <div className="flex items-center gap-4 font-display font-black text-base">
+                  <button onClick={() => setCurrentView({view:'shop'})} className="text-slate-400 hover:text-slate-600 transition-colors text-2xl"><i className="fa-solid fa-store"></i></button>
+                  <div className="flex items-center gap-2 text-duoOrange"><i className="fa-solid fa-fire text-2xl"></i> <span>{streak}</span></div>
+                  <div className="flex items-center gap-2 text-duoBlue"><i className="fa-solid fa-gem text-2xl"></i> <span>{gems}</span></div>
+                  <div className="flex items-center gap-2 text-duoRed"><i className={`fa-solid fa-heart text-2xl ${hearts===0?'text-slate-300':''}`}></i> <span>{hearts}</span></div>
+                </div>
+              </div>
+            </header>
+          )}
+
+          <main className="flex-1 w-full mx-auto p-4 md:p-6">
+            <AnimatePresence mode="wait">
+              {currentView.view === 'path' && <PathMap selectedChapter={1} nodeProgress={nodeProgress} setCurrentView={setCurrentView} />}
+              {currentView.view === 'shop' && <ShopView gems={gems} setGems={setGems} hearts={hearts} setHearts={setHearts} inventory={inventory} setInventory={setInventory} setCurrentView={() => setCurrentView({view:'path'})} isPro={isPro} />}
+              {currentView.view === 'results' && <ResultsView resultData={lastResultData} setCurrentView={() => setCurrentView({view:'path'})} xp={xp} gems={gems} />}
+              
+              {currentView.view === 'fitxa' && <GameFitxaTecnica chapter={{id:1}} gameKey={currentView.key} setCurrentView={() => setCurrentView({view:'path'})} onSuccess={triggerSuccess} onFinish={(s, xp, name) => handleGameFinish(currentView.key, s, xp, name)} />}
+              {currentView.view === 'obra_seccio' && <GameObraSeccio chapter={{id:1}} gameKey={currentView.key} setCurrentView={() => setCurrentView({view:'path'})} onSuccess={triggerSuccess} onError={triggerError} onFinish={(s, xp, name) => handleGameFinish(currentView.key, s, xp, name)} />}
+              {currentView.view === 'tf' && <GameQuizTF chapter={{id:1}} gameKey={currentView.key} setCurrentView={() => setCurrentView({view:'path'})} onSuccess={triggerSuccess} onError={triggerError} onFinish={(s, xp, name) => handleGameFinish(currentView.key, s, xp, name)} />}
+              {currentView.view === 'mc' && <GameQuizMC chapter={{id:1}} gameKey={currentView.key} setCurrentView={() => setCurrentView({view:'path'})} onSuccess={triggerSuccess} onError={triggerError} onFinish={(s, xp, name) => handleGameFinish(currentView.key, s, xp, name)} />}
+            </AnimatePresence>
+          </main>
+
+          <AnimatePresence>
+            {showCprModal && (
+              <motion.div className="fixed inset-0 z-50 bg-slate-900/90 flex flex-col items-center justify-center p-6 text-white">
+                <div className="text-center space-y-6 max-w-sm">
+                  <div className="w-32 h-32 mx-auto relative group">
+                    <div className="absolute inset-0 bg-duoRed rounded-full opacity-20 animate-ping"></div>
+                    <button onClick={handleCprClick} className="relative z-10 w-full h-full bg-duoRed rounded-full shadow-btn-red flex items-center justify-center text-6xl active:translate-y-2 hover:scale-105">❤️</button>
+                  </div>
+                  <h2 className="text-3xl font-display font-black mb-2">Reanimació!</h2>
+                  <p className="text-slate-300 font-bold">Fes clic ràpid per salvar la teva vida.</p>
+                  <div className="w-full bg-slate-800 h-6 rounded-full overflow-hidden border-2 border-slate-700 relative">
+                    <div className="bg-gradient-to-r from-duoRed to-duoYellow h-full transition-all duration-300 rounded-full" style={{ width: `${(cprClicks / 10) * 100}%` }}></div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+            
+            {sheet.isOpen && (
+              <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} className={`fixed bottom-0 left-0 right-0 z-50 p-6 sm:p-8 rounded-t-[32px] border-t-2 ${sheet.type === 'success' ? 'bg-duoBgSuccess border-duoGreen' : 'bg-duoBgError border-duoRed'}`}>
+                  <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div className="flex items-start gap-4">
+                      <div className={`w-14 h-14 rounded-full flex items-center justify-center text-3xl shrink-0 bg-white shadow-sm border-2 ${sheet.type === 'success' ? 'text-duoGreen border-duoBgSuccess' : 'text-duoRed border-duoBgError'}`}>
+                        <i className={`fa-solid ${sheet.type === 'success' ? 'fa-check' : 'fa-xmark'}`}></i>
+                      </div>
+                      <div>
+                        <h3 className={`font-display font-black text-2xl ${sheet.type === 'success' ? 'text-duoTextSuccess' : 'text-duoTextError'}`}>{sheet.title}</h3>
+                        <p className={`text-lg font-bold ${sheet.type === 'success' ? 'text-duoTextSuccess' : 'text-duoTextError'} opacity-90`}>{sheet.message}</p>
+                        <p className={`text-sm font-bold mt-1 opacity-75 ${sheet.type === 'success' ? 'text-duoTextSuccess' : 'text-duoTextError'}`}>{sheet.explanation}</p>
+                      </div>
+                    </div>
+                    <button onClick={sheet.onContinue} className={`w-full sm:w-auto min-w-[200px] font-display font-black text-xl py-4 rounded-[24px] shadow-sm active:translate-y-1 transition-transform border-x-2 border-t-2 border-b-[6px] border-black/10 ${sheet.type === 'success' ? 'bg-duoGreen text-white shadow-btn-green' : 'bg-duoRed text-white shadow-btn-red'}`}>Continuar</button>
+                  </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
